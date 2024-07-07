@@ -55,6 +55,8 @@ const userController = {
           const token = jwt.sign({ id: user._id }, config.SECRET_KEY,{expiresIn:'1h'});
           res.header({ "x-auth-token": token });
           res.send({ message: "Successful Login", token: token, userId:user._id });
+       
+          
         } else {
           res.send({ message: "Invalid Credentials" });
         }

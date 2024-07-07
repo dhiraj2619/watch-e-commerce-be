@@ -18,7 +18,11 @@ const orderRouter = require("./routes/orderRoutes");
 
 // create an express app
 const app = express();
-app.use(cors());
+app.use(cors({
+   origin:'http://localhost:3000',
+   methods:'GET,HEAD,POST,PUT,PATCH,DELETE',
+   credentials:true
+}));
 app.use(express.json());
 
 // set the strictQuery to false, so that it will disable the strict mode for the query filters
