@@ -22,7 +22,6 @@ const userController = {
           firstName,
           lastName,
           emailId: email,
-          address,
           phoneNumber,
           password: hashedPassword,
           address,
