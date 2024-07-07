@@ -76,7 +76,7 @@ const userController = {
   },
   getUserbyId: async (req, res) => {
     try {
-      const id = request.params.id;
+      const id = req.params.id;
       const user = await User.findById(id);
       res.status(200).json({ user });
     } catch (error) {
@@ -84,8 +84,8 @@ const userController = {
     }
   },
   editUserbyId: async (req, res) => {
-    const id = request.params.id;
-    const userToPatch = request.body;
+    const id = req.params.id;
+    const userToPatch = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid user ID" });
