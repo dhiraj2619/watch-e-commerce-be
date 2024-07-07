@@ -99,7 +99,7 @@ const userController = {
        if (!updateduser) {
         return res.status(404).json({ error: "User not found" });
       }
-      res.status(200).json({ message: "Update Successful", user: updateduser });
+      res.status(200).json({ message: "Update Successful", user: updateduser.json() });
   
     } catch (error) {
       console.error("Error updating user:", error);
