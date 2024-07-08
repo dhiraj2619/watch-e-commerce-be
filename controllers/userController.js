@@ -95,7 +95,7 @@ const userController = {
     }
 
     try {
-       const updateduser = User.findByIdAndUpdate(id,userToPatch, { new: true, runValidators: true });
+       const updateduser =await User.findByIdAndUpdate(id,userToPatch, { new: true, runValidators: true });
        if (!updateduser) {
         return res.status(404).json({ error: "User not found" });
       }
