@@ -1,6 +1,18 @@
 const mongoose = require("mongoose");
 const schema = mongoose.Schema;
 
+const cartSchema = new schema({
+  productId:{
+     type:schema.Types.ObjectId,
+     ref:'Product',
+     required:true
+  },
+  quantity:{
+    type:Number,
+    required:true,
+    min:1
+  }
+})
 // schema
 const userSchema = new schema({
 
@@ -50,6 +62,7 @@ const userSchema = new schema({
     type: String,
     required: true,
   },
+  cart:[cartSchema],
   createdAt: {
     type: Date,
     default: Date.now,

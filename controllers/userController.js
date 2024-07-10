@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const userController = {
   register: async (req, res) => {
     try {
-      const {firstName, lastName, email, phoneNumber,password, address=null,city=null,flatno=null,pincode=null,state=null } =
+      const { firstName, lastName, email, phoneNumber, password, address = null, city = null, flatno = null, pincode = null, state = null } =
         req.body;
 
       const existingUser = await User.findOne({ emailId: email });
@@ -53,11 +53,11 @@ const userController = {
         const storedPassword = user.password;
         const isPasswordMatch = await bcrypt.compare(password, storedPassword);
         if (isPasswordMatch) {
-          const token = jwt.sign({ id: user._id }, config.SECRET_KEY,{expiresIn:'1h'});
+          const token = jwt.sign({ id: user._id }, config.SECRET_KEY, { expiresIn: '6h' });
           res.header({ "x-auth-token": token });
-          res.send({ message: "Successful Login", token: token, userId:user._id });
-       
-          
+          res.send({ message: "Successful Login", token: token, userId: user._id });
+
+
         } else {
           res.send({ message: "Invalid Credentials" });
         }
@@ -95,17 +95,17 @@ const userController = {
     }
 
     try {
-       const updateduser =await User.findByIdAndUpdate(id,userToPatch, { new: true, runValidators: true });
-       if (!updateduser) {
+      const updateduser = await User.findByIdAndUpdate(id, userToPatch, { new: true, runValidators: true });
+      if (!updateduser) {
         return res.status(404).json({ error: "User not found" });
       }
       res.status(200).json({ message: "Update Successful", user: updateduser.toJSON() });
-  
+
     } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ error: "Internal server error" });
     }
-    
+
   },
   deleteUserbyId: async (req, res) => {
     async (req, res) => {
@@ -137,6 +137,93 @@ const userController = {
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
+
+  getCart: async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const user = await User.findById(userId).populate('cart.productId');
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      return res.status(200).json({ cart: user.cart });
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+  addToCart: async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const { productId, quantity } = req.body;
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const existingCartItem = user.cart.find(item => item.productId.toString() === productId);
+      if (existingCartItem) {
+        existingCartItem.quantity += quantity
+      }
+      else {
+        user.cart.push({ productId, quantity })
+      }
+
+      await user.save();
+      res.status(200).json({ message: "Item added to cart", cart: user.cart });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+  updateCartItem:async(req,res)=>{
+     try {
+      const userId = req.params.userId;
+      const { productId, quantity } = req.body;
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const cartItem = user.cart.find(item => item.productId.toString() === productId);
+      if (cartItem) {
+        cartItem.quantity = quantity;
+        await user.save();
+        res.status(200).json({ message: "Cart item updated", cart: user.cart });
+      } else {
+        res.status(404).json({ message: "Item not found in cart" });
+      }
+     } catch (error) {
+      console.error("Error updating cart item:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+     }
+  },
+  removeCartItem: async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const { productId } = req.params;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      const cartIndex = user.cart.findIndex(item => item.productId.toString() === productId);
+      if (cartIndex > -1) {
+        user.cart.splice(cartIndex, 1);
+        await user.save();
+        res.status(200).json({ message: "Item removed from cart", cart: user.cart });
+      } else {
+        res.status(404).json({ message: "Item not found in cart" });
+      }
+    } catch (error) {
+      console.error("Error removing cart item:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
 };
 
+
+// cart operations
 module.exports = userController;
