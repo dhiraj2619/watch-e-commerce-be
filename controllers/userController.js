@@ -187,7 +187,7 @@ const userController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-    const cartItem = user.cart.id(userId);
+    const cartItem = user.cart.id(cartId);
     if(cartItem){
         if(increment){
            cartItem.quantity += 1
