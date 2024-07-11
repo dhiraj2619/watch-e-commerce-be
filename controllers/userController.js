@@ -180,21 +180,27 @@ const userController = {
   updateCartItem:async(req,res)=>{
      try {
       const userId = req.params.userId;
-      const { productId, quantity } = req.body;
+      const { cartId, increment } = req.body;
       const user = await User.findById(userId);
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const cartItem = user.cart.find(item => item.productId.toString() === productId);
-      if (cartItem) {
-        cartItem.quantity = quantity;
+    const cartItem = user.cart.id(userId);
+    if(cartItem){
+        if(increment){
+           cartItem.quantity += 1
+        }
+        else{
+          cartItem.quantity = Math.max(cartItem.quantity -1,1);
+        }
         await user.save();
         res.status(200).json({ message: "Cart item updated", cart: user.cart });
-      } else {
-        res.status(404).json({ message: "Item not found in cart" });
-      }
+    }
+    else{
+      res.status(404).json({ message: "Item not found in cart" });
+    }
      } catch (error) {
       console.error("Error updating cart item:", error);
       res.status(500).json({ message: "Internal Server Error" });
