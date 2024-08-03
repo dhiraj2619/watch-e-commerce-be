@@ -180,14 +180,14 @@ const userController = {
   updateCartItem:async(req,res)=>{
      try {
       const userId = req.params.userId;
-      const { cartId, increment } = req.body;
+      const { _id, increment } = req.body;
       const user = await User.findById(userId);
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-    const cartItem = user.cart.id(cartId);
+    const cartItem = user.cart.id(_id);
     if(cartItem){
         if(increment){
            cartItem.quantity += 1
