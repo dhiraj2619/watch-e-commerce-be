@@ -155,25 +155,23 @@ const userController = {
   addToCart: async (req, res) => {
     try {
       const userId = req.params.userId;
-      const { productId, quantity } = req.body;
+      const cartItem = req.body;
+  
       const user = await User.findById(userId);
-
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      const existingCartItem = user.cart.find(item => item.productId.toString() === productId);
-      if (existingCartItem) {
-        existingCartItem.quantity += quantity
-      }
-      else {
-        user.cart.push({ productId, quantity })
-      }
-
+  
+      // Add the new item to the cart
+      user.cart.push(cartItem);
       await user.save();
-      res.status(200).json({ message: "Item added to cart", cart: user.cart });
+  
+      // Return the newly added cart item
+      const addedItem = user.cart[user.cart.length - 1];
+      res.status(200).json({ cartItem: addedItem });
+  
     } catch (error) {
-      console.error("Error adding to cart:", error);
+      console.error("Error adding item to cart:", error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   },
