@@ -44,29 +44,29 @@ const userController = {
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
-
+  
       const user = await User.findOne({ emailId: email });
-
+  
       if (!user) {
-        res.status(400).send({ message: "Invalid Credentials" });
+        return res.status(400).send({ message: "Invalid Credentials" });
+      }
+  
+      const storedPassword = user.password;
+      const isPasswordMatch = await bcrypt.compare(password, storedPassword);
+  
+      if (isPasswordMatch) {
+        const token = jwt.sign({ id: user._id }, config.SECRET_KEY, { expiresIn: '6h' });
+        res.header({ "x-auth-token": token });
+        return res.send({ message: "Successful Login", token: token, userId: user._id });
       } else {
-        const storedPassword = user.password;
-        const isPasswordMatch = await bcrypt.compare(password, storedPassword);
-        if (isPasswordMatch) {
-          const token = jwt.sign({ id: user._id }, config.SECRET_KEY, { expiresIn: '6h' });
-          res.header({ "x-auth-token": token });
-          res.send({ message: "Successful Login", token: token, userId: user._id });
-
-
-        } else {
-          res.send({ message: "Invalid Credentials" });
-        }
+        return res.status(400).send({ message: "Invalid Credentials" });
       }
     } catch (error) {
       console.error("Error signing In");
-      res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   },
+  
   logout: async (req, res) => {
     try {
       // Clear the token on the client-side (assuming you're using JWT for authentication)
