@@ -48,7 +48,7 @@ const userController = {
       const user = await User.findOne({ emailId: email });
   
       if (!user) {
-        return res.status(400).send({ message: "Invalid Credentials" });
+        return res.status(400).json({ message: "user not found with this email id" });
       }
   
       const storedPassword = user.password;
@@ -57,9 +57,9 @@ const userController = {
       if (isPasswordMatch) {
         const token = jwt.sign({ id: user._id }, config.SECRET_KEY, { expiresIn: '6h' });
         res.header({ "x-auth-token": token });
-        return res.send({ message: "Successful Login", token: token, userId: user._id });
+        return res.json({ message: "Successful Login", token: token, userId: user._id });
       } else {
-        return res.status(400).send({ message: "Invalid Credentials" });
+        return res.status(400).json({ message: "invalid password" });
       }
     } catch (error) {
       console.error("Error signing In");
