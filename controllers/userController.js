@@ -204,7 +204,7 @@ const userController = {
       console.error("Error updating cart quantity:", error);
       res.status(500).json({ message: "Internal Server Error" });
     }
-  }
+  },
   
   removeCartItem: async (req, res) => {
     try {
