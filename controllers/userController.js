@@ -154,27 +154,34 @@ const userController = {
   },
   addToCart: async (req, res) => {
     try {
-      const userId = req.params.userId;
-      const { productId, quantity } = req.body;
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
+      const { userId } = req.params;
+      const { productId } = req.body;
+  
+      // Validate input
+      if (!userId || !productId) {
+        return res.status(400).json({ message: 'User ID and Product ID are required' });
       }
-
-      const existingCartItem = user.cart.find(item => item.productId.toString() === productId);
-      if (existingCartItem) {
-        existingCartItem.quantity += quantity
+  
+      // Find user cart and add item
+      let cart = await Cart.findOne({ userId });
+      if (!cart) {
+        cart = new Cart({ userId, items: [] });
       }
-      else {
-        user.cart.push({ productId, quantity })
+  
+      const itemIndex = cart.items.findIndex(item => item.productId === productId);
+      if (itemIndex > -1) {
+        // Item already exists, increment quantity
+        cart.items[itemIndex].quantity += 1;
+      } else {
+        // Add new item to cart
+        cart.items.push({ productId, quantity: 1 });
       }
-
-      await user.save();
-      res.status(200).json({ message: "Item added to cart", cart: user.cart });
+  
+      await cart.save();
+      res.status(200).json({ message: 'Item added to cart', cart });
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      res.status(500).json({ message: "Internal Server Error" });
+      console.error('Error adding to cart:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
     }
   },
   updateCartItem: async (req, res) => {
