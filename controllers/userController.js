@@ -181,30 +181,31 @@ const userController = {
   updateCartItem: async (req, res) => {
     try {
       const userId = req.params.userId;
-      const { _id, increment } = req.body;
+      const { productId, increment } = req.body;
       const user = await User.findById(userId);
-
+  
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-
-      const cartItem = user.cart.find(item => item._id.toString() === _id);
+  
+      const cartItem = user.cart.find(item => item.productId.toString() === productId);
       if (!cartItem) {
         return res.status(404).json({ message: "Item not found in cart" });
       }
-
+  
       cartItem.quantity += increment ? 1 : -1;
       if (cartItem.quantity <= 0) {
-        user.cart = user.cart.filter(item => item._id.toString() !== _id);
+        user.cart = user.cart.filter(item => item.productId.toString() !== productId);
       }
-
+  
       await user.save();
       res.status(200).json({ message: "Cart updated successfully", cart: user.cart });
     } catch (error) {
       console.error("Error updating cart quantity:", error);
       res.status(500).json({ message: "Internal Server Error" });
     }
-  },
+  }
+  
   removeCartItem: async (req, res) => {
     try {
       const userId = req.params.userId;
